@@ -1,0 +1,121 @@
+local codes = {
+
+	["test"] = {
+
+		-- These are example currencies, these can be replaced or removed.
+		["Coins"] = 1,
+		["Gems"] = 5,
+
+		["codeFunction"] = function(player:Player)
+			print("hi, codeFunction called!")
+		end,
+
+		["Expire_Settings"] = {
+			["Can_Expire"] = true;
+			["Expire_Date"] = os.time() + 120,
+		};
+
+	},
+
+};
+
+local errors = {
+	["Missing"] = "Code does not exist", -- Code = nil
+	["Expired"] = "Code is expired.", -- Code is expired
+	["Success"] = [[Successfully redeemed "%s".]], -- Code redeemed successfully.
+	["Flooded"] = "You are sending too many requests.", -- User is flooding requests.
+	["Previously_Redeemed"] = "You already redeemed this code.", -- The user already redeemed this code.
+	["DataStoreFail"] = "DataStore-Malfunctioned | [Try Again]", -- Error relating CodeStoreCache.
+};
+
+local DataStoreService = game:GetService("DataStoreService")
+local CodeStoreCache = DataStoreService:GetDataStore("CodeStoreCache");
+
+local module = {}
+local redeemCache = {["128620225.test"]=true};
+
+local function getRC_KEY(id,code)
+	return ("%s.%s"):format(tostring(id), tostring(code))
+end
+
+function module.handle_Code(codeValue:string, playerID:number)
+
+	local expSettings = codes[codeValue];
+	local codeValid = expSettings and ((expSettings["Expire_Settings"]["Can_Expire"] == false) or (expSettings["Expire_Settings"]["Expire_Date"] >= os.time()));
+
+	print(getRC_KEY(playerID, codeValue))
+
+	if not expSettings then
+		return errors.Missing;
+	elseif not codeValid then
+		return errors.Expired;
+	elseif (redeemCache[getRC_KEY(playerID, codeValue)] ~= nil) then
+		return errors.Previously_Redeemed;
+	end
+
+	print("Success?")
+	return true;
+
+end
+
+function module.awardPlayer(player, code)
+	local codeData = codes[code];
+	
+	-- I highly recommend you edit this to make it your own.
+	-- Gems and Coins were intended to demonstrate functionality.
+	
+	local coins = codeData.Coins
+	local gems = codeData.Gems
+	
+	player.leaderstats["Gems"].Value += gems
+	player.leaderstats["Coins"].Value += coins
+	
+	codeData["codeFunction"](player);
+	
+end
+
+function module.redeemCode(player:Player, code)
+	if player then
+
+		local codeReturn = module.handle_Code(code, player.UserId);
+
+		if typeof(codeReturn) == "string" then
+			return codeReturn:format(tostring(code or ""));
+		end
+
+		do -- Check if previously used in another server VIA DataStore.
+			local isUsed = nil;
+
+			local isUsed_Success = pcall(function()
+				isUsed = CodeStoreCache:GetAsync(getRC_KEY(player.UserId, code))
+			end)
+			
+			if not isUsed_Success then
+				return errors.DataStoreFail;
+			end
+			
+			if isUsed then
+				redeemCache[getRC_KEY(player.UserId, code)] = true;
+				return errors.Previously_Redeemed;
+			end
+		end
+		
+		do -- Redeeming Process.
+			
+			local saveRedeemed_Success = pcall(function()
+				CodeStoreCache:SetAsync(getRC_KEY(player.UserId, code), true);
+			end)
+			
+			if not saveRedeemed_Success then
+				return errors.DataStoreFail;
+			end
+			
+			table.insert(redeemCache, table.getn(redeemCache) + 1, {player.UserId, code})
+			module.awardPlayer(player, code);
+			
+		end
+		
+	end
+end
+
+return module
