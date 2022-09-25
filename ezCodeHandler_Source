@@ -32,7 +32,7 @@ local DataStoreService = game:GetService("DataStoreService")
 local CodeStoreCache = DataStoreService:GetDataStore("CodeStoreCache");
 
 local module = {}
-local redeemCache = {["128620225.test"]=true};
+local redeemCache = {};
 
 local function getRC_KEY(id,code)
 	return ("%s.%s"):format(tostring(id), tostring(code))
