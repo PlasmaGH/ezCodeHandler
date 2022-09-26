@@ -32,7 +32,7 @@ Whenever a code is redeemed by a player, the function under the code data "`code
 
 ## Customization 🎨
 
-### Errors:
+> ### Errors:
 There are many ways to customize this module, let's start with errors.
 
 ```
@@ -50,7 +50,7 @@ Currently, these are the default returned errors. These can be changed without t
 
 ---
 
-### Cooldown 🧊
+> ### Cooldown 🧊
 
 To prevent spamming, this variable should be above 5.
 If the player exceeds the cooldown, the "Flooded" error will be returned.
