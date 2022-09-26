@@ -81,7 +81,7 @@ function module.redeemCode(player:Player, code)
 
 		if not __floodMonitor[player.UserId] then
 			__floodMonitor[player.UserId] = os.time();
-		elseif __floodMonitor[player.UserId] + __floodMonitor < os.time() then
+		elseif __floodMonitor[player.UserId] + codeCooldown < os.time() then
 			return errors.Flooded;
 		end
 
