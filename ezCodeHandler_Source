@@ -3,6 +3,8 @@ local codes = {
 	["test"] = {
 
 		-- These are example currencies, these can be replaced or removed.
+		-- Please read further into the .ReadMe file.
+		
 		["Coins"] = 1,
 		["Gems"] = 5,
 
@@ -38,7 +40,7 @@ local redeemCache = {};
 local __floodMonitor = {};
 
 local function getRC_KEY(id,code)
-	return ("%s.%s"):format(tostring(id), tostring(code))
+	return ("%s.%s"):format(tostring(id), tostring(code));
 end
 
 function module.handle_Code(codeValue:string, playerID:number)
@@ -66,11 +68,11 @@ function module.awardPlayer(player, code)
 	-- I highly recommend you edit this to make it your own.
 	-- Gems and Coins were intended to demonstrate functionality.
 
-	local coins = codeData.Coins
-	local gems = codeData.Gems
+	local coins = codeData.Coins;
+	local gems = codeData.Gems;
 
-	player.leaderstats["Gems"].Value += gems
-	player.leaderstats["Coins"].Value += coins
+	player.leaderstats["Gems"].Value += gems;
+	player.leaderstats["Coins"].Value += coins;
 
 	codeData["codeFunction"](player);
 
@@ -106,7 +108,7 @@ function module.redeemCode(player:Player, code)
 				return errors.DataStoreFail;
 			end
 
-			if isUsed then
+			if (isUsed) then
 				redeemCache[getRC_KEY(player.UserId, code)] = true;
 				return errors.Previously_Redeemed;
 			end
